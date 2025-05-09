@@ -3,7 +3,7 @@ import requests, pathlib, json, datetime as dt
 
 DATA   = pathlib.Path("data"); DATA.mkdir(exist_ok=True)
 today  = dt.date.today()
-base   = "https://data.cms.gov/data-api/v1/dataset/ynj2-r877/data"
+base   = "https://data.cms.gov/provider-data/api/v1/dataset/ynj2-r877/data"
 
 where  = "worksheet_code in ('E','E-1') and report_period_end >= '2022-01-01'"
 limit  = 10000          # CMS max page size
