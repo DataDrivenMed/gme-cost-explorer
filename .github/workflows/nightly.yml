@@ -2,7 +2,7 @@ name: Nightly GME update
 permissions: {contents: write}
 
 on:
-  schedule: [{cron: '25 4 * * *'}]   # 04:25 UTC nightly
+  schedule: [{cron: '25 4 * * *'}]      # 04:25 UTC nightly
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,13 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: python src/fetch_hcris.py
+      # ---------- new env block ----------
+      - name: Fetch CMS HCRIS data
+        run: python src/fetch_hcris.py
+        env:
+          CMS_APP_TOKEN: ${{ secrets.CMS_APP_TOKEN }}
+      # ------------------------------------
+
       - run: python src/parse_gme.py
       - run: python src/make_digest.py
       - run: python src/md_to_html.py
