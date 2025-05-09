@@ -1,25 +1,25 @@
-# src/fetch_hcris.py
+# src/fetch_hcris.py  – Socrata resource endpoint version
 import requests, pathlib, json, datetime as dt
 
-DATA   = pathlib.Path("data"); DATA.mkdir(exist_ok=True)
-today  = dt.date.today()
-base   = "https://data.cms.gov/provider-data/api/v1/dataset/ynj2-r877/data"
+DATA = pathlib.Path("data"); DATA.mkdir(exist_ok=True)
+today = dt.date.today()
 
-where  = "worksheet_code in ('E','E-1') and report_period_end >= '2022-01-01'"
-limit  = 10000          # CMS max page size
+BASE = "https://data.cms.gov/resource/ynj2-r877.json"
+WHERE = "worksheet_code in ('E','E-1') and report_period_end >= '2022-01-01'"
+LIMIT = 50000    # Socrata max is 50k
 
-rows   = []
+rows  = []
 offset = 0
 while True:
-    params = {"$limit": limit, "$offset": offset, "$where": where}
-    r = requests.get(base, params=params, timeout=60)
+    params = {"$limit": LIMIT, "$offset": offset, "$where": WHERE}
+    r = requests.get(BASE, params=params, timeout=60)
     if r.status_code != 200:
         raise RuntimeError(f"CMS API error {r.status_code}: {r.text[:200]}")
     page = r.json()
     if not page:
-        break
+        break        # no more pages
     rows.extend(page)
-    offset += limit
+    offset += LIMIT
     print(f"Fetched {len(page):>5} rows  (total {len(rows)})")
 
 out = DATA / f"hcris_raw_{today}.json"
