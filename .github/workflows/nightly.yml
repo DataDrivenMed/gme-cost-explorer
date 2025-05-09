@@ -1,0 +1,29 @@
+name: Nightly GME update
+permissions: {contents: write}
+
+on:
+  schedule: [{cron: '25 4 * * *'}]   # 04:25 UTC nightly
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+
+      - run: pip install -r requirements.txt
+
+      - run: python src/fetch_hcris.py
+      - run: python src/parse_gme.py
+      - run: python src/make_digest.py
+      - run: python src/md_to_html.py
+
+      - run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name  "GH‑Actions Bot"
+          git add data/ digests/ docs/
+          git commit -m "Nightly GME update $(date -u '+%Y-%m-%d')" || echo "No changes"
+          git push
